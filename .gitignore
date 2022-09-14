@@ -1,0 +1,13 @@
+# virtual env
+venv
+
+# client secret
+*_client_secret.json
+*client_secret.json
+r3robot_client_secret.json
+
+# tts output files
+*.mp3
+
+# Mac OS
+.DS_Store
