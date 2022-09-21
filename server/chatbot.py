@@ -9,6 +9,9 @@ from dialogflow_util import detect_intent_texts
 class Chatbot(Resource):
     def get(self):
         text = 'hello'
+        return self.run_chatbot(text)
+
+    def run_chatbot(self, text):
         session_id = str(uuid.uuid4())
         response = detect_intent_texts(
             DialogflowConfig_TTS.project_id,
@@ -19,6 +22,3 @@ class Chatbot(Resource):
             DialogflowConfig_TTS.language_code,
         )
         return {'response': response}
-
-    def post(self):
-        return {'hello': 'world'}

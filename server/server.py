@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, request
 from flask_restx import Api
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
@@ -63,10 +63,30 @@ class FlaskServer:
         API = self.api
 
         @API.route('/chatbot')
-        class ChatbotAPI(Chatbot):pass
+        class ChatbotAPI(Chatbot):
+            def post(self):
+                parameter_dict = request.args.to_dict()
+                if len(parameter_dict) == 0:
+                    # set status code as 400
+                    return {'error': 'no parameter'}, 400
+                if 'text' not in parameter_dict:
+                    # set status code as 400
+                    return {'error': 'no text parameter'}, 400
+                text = parameter_dict['text']
+                return self.run_chatbot(text)
 
         @API.route('/tts')
-        class TTS_API(TTS):pass
+        class TTS_API(TTS):
+            def post(self):
+                parameter_dict = request.args.to_dict()
+                if len(parameter_dict) == 0:
+                    # set status code as 400
+                    return {'error': 'no parameter'}, 400
+                if 'text' not in parameter_dict:
+                    # set status code as 400
+                    return {'error': 'no text parameter'}, 400
+                text = parameter_dict['text']
+                return self.run_tts(text)
 
         @API.route('/test')
         class TestAPI(Test):pass

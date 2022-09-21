@@ -9,13 +9,16 @@ from dialogflow_util import detect_intent_synthesize_tts_response
 
 class TTS(Resource):
     def get(self):
+        return self.run_tts('오늘 날씨 알려줘')
+
+    def run_tts(self, text):
         session_id = str(uuid.uuid4())
         output_file_path = f'{session_id}.mp4'
         detect_intent_synthesize_tts_response(
             DialogflowConfig_TTS.project_id,
             DialogflowConfig_TTS.location,
             DialogflowConfig_TTS.agent_id,
-            '안녕하세요',
+            text,
             DialogflowConfig_TTS.audio_encoding,
             DialogflowConfig_TTS.language_code,
             output_file_path,
