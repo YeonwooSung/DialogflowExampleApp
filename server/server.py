@@ -15,6 +15,7 @@ class FlaskServer:
         description:str='Dialogflow CX API server', 
         port:int=8080, version='1.0', 
         host='0.0.0.0',
+        ip_ban_mode:bool=False,
     ):
         # self.name = name
         self.title = title
@@ -27,6 +28,16 @@ class FlaskServer:
         # init Flask application
         self.app = Flask(name)
         self.api = Api(self.app, version=version, title=title, description=description)
+
+        # ip ban
+        if ip_ban_mode:
+            from flask_limiter import Limiter
+            from flask_limiter.util import get_remote_address
+            limiter = Limiter(
+                self.app,
+                key_func=get_remote_address,
+                default_limits=["200 per day", "50 per hour"]
+            )
 
     def run(self, debug:bool=True):
         if not self.endpoints_added:
