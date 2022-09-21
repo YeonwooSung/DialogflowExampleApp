@@ -1,3 +1,4 @@
+from flask import send_file
 from flask_restx import Resource
 import uuid
 import os
@@ -23,6 +24,6 @@ class TTS(Resource):
 
         # check if file exists
         if os.path.isfile(output_file_path):
-            return {'output': output_file_path}
+            return send_file(output_file_path, as_attachment=True)
         else:
             return {'output': 'failed'}
