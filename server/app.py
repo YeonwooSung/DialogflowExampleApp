@@ -3,9 +3,9 @@ import os
 
 from server import FlaskServer
 
-from api.chatbot import Chatbot
-from api.tts import TTS
-from api.test import Test
+from chatbot import Chatbot
+from tts import TTS
+from test import Test
 
 
 # Constants

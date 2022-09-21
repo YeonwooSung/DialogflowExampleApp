@@ -2,8 +2,8 @@ from flask_restx import Resource
 import uuid
 import os
 
-from ..config import DialogflowConfig_TTS
-from ..dialogflow_util import detect_intent_texts
+from config import DialogflowConfig_TTS
+from dialogflow_util import detect_intent_texts
 
 
 class Chatbot(Resource):
