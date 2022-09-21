@@ -21,4 +21,4 @@ class FlaskServer:
         self.api = Api(self.app, version=version, title=title, description=description)
 
     def run(self, debug:bool=True):
-        self.app.run(debug=True, host=self, port=self.port)
+        self.app.run(debug=True, host=self.host, port=self.port)
