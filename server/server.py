@@ -41,7 +41,7 @@ class FlaskServer:
 
     def run(self, debug:bool=True):
         if not self.endpoints_added:
-            self.add_endpoints()
+            self.add_routers()
         self.app.run(debug=True, host=self.host, port=self.port)
 
     def add_routers(self):
