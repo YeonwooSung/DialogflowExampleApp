@@ -1,5 +1,8 @@
 from flask import Flask
-from flask_restx import Api, Resource
+from flask_restx import Api
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
+from flask_ipban import IpBan
 
 
 from chatbot import Chatbot
@@ -15,7 +18,8 @@ class FlaskServer:
         description:str='Dialogflow CX API server', 
         port:int=8080, version='1.0', 
         host='0.0.0.0',
-        ip_ban_mode:bool=False,
+        ip_ban_mode:bool=True,
+        limit_mode:bool=True,
     ):
         # self.name = name
         self.title = title
@@ -29,20 +33,28 @@ class FlaskServer:
         self.app = Flask(name)
         self.api = Api(self.app, version=version, title=title, description=description)
 
-        # ip ban
-        if ip_ban_mode:
-            from flask_limiter import Limiter
-            from flask_limiter.util import get_remote_address
-            limiter = Limiter(
+        self.limit_mode = limit_mode
+        self.limiter = None
+        # limiter
+        if self.limit_mode:
+            self.limiter = Limiter(
                 self.app,
                 key_func=get_remote_address,
                 default_limits=["200 per day", "50 per hour"]
             )
+        
+        # ip ban mode
+        self.ip_ban_mode = ip_ban_mode
+        if self.ip_ban_mode:
+            ip_ban = IpBan(ban_seconds=200)
+            ip_ban.init_app(self.app)
+
 
     def run(self, debug:bool=True):
         if not self.endpoints_added:
             self.add_routers()
         self.app.run(debug=True, host=self.host, port=self.port)
+
 
     def add_routers(self):
         self.endpoints_added = True
