@@ -7,7 +7,7 @@ from api.tts import TTS
 
 
 # Constants
-PORT = int(os.getenv('PORT', 80)) # 8080 is the default port
+PORT = int(os.getenv('PORT', 8080)) # 8080 is the default port
 
 # Create Flask server
 server = FlaskServer(port=PORT)
