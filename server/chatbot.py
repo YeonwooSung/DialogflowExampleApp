@@ -8,7 +8,7 @@ from dialogflow_util import detect_intent_texts
 
 class Chatbot(Resource):
     def get(self):
-        text = '안녕하세요'
+        text = 'hello'
         session_id = str(uuid.uuid4())
         response = detect_intent_texts(
             DialogflowConfig_TTS.project_id,

@@ -21,7 +21,7 @@ class FlaskServer:
         ip_ban_mode:bool=True,
         limit_mode:bool=True,
     ):
-        # self.name = name
+        self.name = name
         self.title = title
         self.description = description
         self.port = port
