@@ -1,6 +1,3 @@
-import uuid
-import os
-
 from google.cloud.dialogflowcx_v3.services.agents import AgentsClient
 from google.cloud.dialogflowcx_v3.services.sessions import SessionsClient
 from google.cloud.dialogflowcx_v3.types import audio_config
