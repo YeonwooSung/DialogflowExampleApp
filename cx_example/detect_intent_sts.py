@@ -10,7 +10,7 @@ from pydub import AudioSegment
 from pydub.utils import make_chunks
 
 
-def run_sample():
+def run_sample(stream_ver=True):
     """Run a sample Dialogflow API call"""
     project_id = "r3test"
     # For more information about regionalization see https://cloud.google.com/dialogflow/cx/docs/how/region
@@ -24,8 +24,10 @@ def run_sample():
     language_code = "ko"
     audio_encoding = "OUTPUT_AUDIO_ENCODING_MP3_64_KBPS"
     output_file = "./sts_output.mp3"
-    # detect_intent_audio(agent, session_id, audio_file_path, language_code, audio_encoding, output_file)
-    detect_intent_stream(agent, session_id, audio_file_path, language_code)
+    if stream_ver:
+        detect_intent_stream(agent, session_id, audio_file_path, language_code, audio_encoding, output_file)
+    else:
+        detect_intent_audio(agent, session_id, audio_file_path, language_code, audio_encoding, output_file)
 
 
 def detect_intent_audio(agent, session_id, audio_file_path, language_code, audio_encoding, output_file, debug=False):
@@ -88,7 +90,7 @@ def detect_intent_audio(agent, session_id, audio_file_path, language_code, audio
     print(f'Audio content written to file: {output_file}')
 
 
-def detect_intent_stream(agent, session_id, audio_file_path, language_code):
+def detect_intent_stream(agent, session_id, audio_file_path, language_code, audio_encoding, output_file, debug=True):
     """Returns the result of detect intent with streaming audio as input.
 
     Using the same `session_id` between requests allows continuation
@@ -112,23 +114,27 @@ def detect_intent_stream(agent, session_id, audio_file_path, language_code):
     def request_generator():
         audio_input = session.AudioInput(config=input_audio_config)
         query_input = session.QueryInput(audio=audio_input, language_code=language_code)
-        voice_selection = audio_config.VoiceSelectionParams()
-        synthesize_speech_config = audio_config.SynthesizeSpeechConfig()
-        output_audio_config = audio_config.OutputAudioConfig()
+        # voice_selection = audio_config.VoiceSelectionParams()
+        # synthesize_speech_config = audio_config.SynthesizeSpeechConfig()
 
         # Sets the voice name and gender
-        voice_selection.name = "en-GB-Standard-A"
-        voice_selection.ssml_gender = (
-            audio_config.SsmlVoiceGender.SSML_VOICE_GENDER_FEMALE
+        # voice_selection.name = "en-GB-Standard-A"
+        # voice_selection.ssml_gender = (
+        #     audio_config.SsmlVoiceGender.SSML_VOICE_GENDER_FEMALE
+        # )
+        synthesize_speech_config = audio_config.SynthesizeSpeechConfig(
+            speaking_rate=1,
+            pitch=0.0,
         )
 
-        synthesize_speech_config.voice = voice_selection
+        # synthesize_speech_config.voice = voice_selection
 
         # Sets the audio encoding
-        output_audio_config.audio_encoding = (
-            audio_config.OutputAudioEncoding.OUTPUT_AUDIO_ENCODING_UNSPECIFIED
+        output_audio_config = audio_config.OutputAudioConfig(
+            synthesize_speech_config=synthesize_speech_config,
+            audio_encoding=audio_config.OutputAudioEncoding[audio_encoding],
         )
-        output_audio_config.synthesize_speech_config = synthesize_speech_config
+        # output_audio_config.synthesize_speech_config = synthesize_speech_config
 
         # The first request contains the configuration.
         yield session.StreamingDetectIntentRequest(
@@ -194,6 +200,19 @@ def detect_intent_stream(agent, session_id, audio_file_path, language_code):
         " ".join(msg.text.text) for msg in response.query_result.response_messages
     ]
     print(f"Response text: {' '.join(response_messages)}\n")
+
+    if debug:
+        print("=" * 20)
+        print(f"Query text: {response.query_result.transcript}")
+        print(f"Response text: {' '.join(response_messages)}\n")
+        print(
+        'Speaking Rate: '
+        f'{response.output_audio_config.synthesize_speech_config.speaking_rate}')
+        print(
+        'Pitch: '
+        f'{response.output_audio_config.synthesize_speech_config.pitch}')
+    with open(output_file, 'wb') as fout:
+        fout.write(response.output_audio)
 
 
 if __name__ == "__main__":
