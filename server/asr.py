@@ -40,11 +40,12 @@ class AutomaticSpeechRecognition(Resource):
         else:
             return self.genereate_json_with_utf8(text_only_output_json)
 
-    def generate_json_response_with_audio(self, input_data, output_file_path):
+    def generate_json_response_with_audio(self, input_text, response_text, output_file_path):
         # genearate multipart/form-data response with audio file
         m = MultipartEncoder(
             fields={
-                'json': (None, input_data, 'application/json'),
+                'input': input_text,
+                'output': response_text,
                 'audio': (output_file_path, open(output_file_path, 'rb'), 'audio/mpeg'),
             }
         )
