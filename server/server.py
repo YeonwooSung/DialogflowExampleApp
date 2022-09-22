@@ -3,10 +3,12 @@ from flask_restx import Api
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from flask_ipban import IpBan
-
+import os
+from werkzeug.utils import secure_filename
 
 from asr import AutomaticSpeechRecognition
 from chatbot import Chatbot
+from config import INPUT_MEDIA_DIR
 from tts import TTS
 from test import Test
 
@@ -75,7 +77,14 @@ class FlaskServer:
         @API.route('/asr')
         class ASR(AutomaticSpeechRecognition):
             def post(self):
-                input_file_path = request.files['file']
+                if 'file' not in request.files:
+                    return 'File is missing', 404
+                audio_file = request.files['file']
+                if audio_file.filename == '':
+                    return 'File is missing', 404
+                filename = secure_filename(audio_file.filename)
+                input_file_path = os.path.join(INPUT_MEDIA_DIR, filename)
+                audio_file.save(input_file_path)
                 return self.run_asr(input_file_path)
 
 
