@@ -1,7 +1,9 @@
-from flask import send_file
+from flask import Response
 from flask_restx import Resource
 import uuid
 import os
+
+from requests_toolbelt import MultipartEncoder
 
 from config import DialogflowConfig_ASR, DEFAULT_MEDIA_DIR
 from dialogflow_util import detect_intent_stream, detect_intent_audio
@@ -40,10 +42,13 @@ class AutomaticSpeechRecognition(Resource):
 
     def generate_json_response_with_audio(self, input_data, output_file_path):
         # genearate multipart/form-data response with audio file
-        return {
-            'json': input_data,
-            'audio': send_file(output_file_path, as_attachment=True),
-        }, 200, {'Content-Type': 'multipart/form-data; charset=utf-8'}
+        m = MultipartEncoder(
+            fields={
+                'json': (None, self.genereate_json_with_utf8(input_data), 'application/json'),
+                'audio': (output_file_path, open(output_file_path, 'rb'), 'audio/mpeg'),
+            }
+        )
+        return Response(m.fields, mimetype=m.content_type)
 
     @as_json
     def genereate_json_with_utf8(self, input_json):
