@@ -135,4 +135,4 @@ def detect_intent_texts(project_id, location_id, agent_id, session_id, text, lan
 
     response_text = ' '.join(response_messages)
     print(f"Response text: {response_text}\n")
-    return response_messages
+    return response_text
