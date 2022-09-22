@@ -36,7 +36,7 @@ class AutomaticSpeechRecognition(Resource):
 
         # check if file exists
         if os.path.isfile(output_file_path):
-            return self.generate_json_response_with_audio(text_only_output_json, output_file_path)
+            return self.generate_json_response_with_audio(transcript, response_text, output_file_path)
         else:
             return self.genereate_json_with_utf8(text_only_output_json)
 
