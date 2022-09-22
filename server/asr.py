@@ -4,7 +4,7 @@ import uuid
 import os
 
 from config import DialogflowConfig_ASR, DEFAULT_MEDIA_DIR
-from dialogflow_util import detect_intent_stream
+from dialogflow_util import detect_intent_stream, detect_intent_audio
 from wrapper import as_json
 
 
@@ -14,7 +14,7 @@ class AutomaticSpeechRecognition(Resource):
         output_file_path = f'DEFAULT_MEDIA_DIR/{session_id}.mp3'
 
         # send API request for automatic speech recognition with text to speech
-        transcript, response_text, output_file_path = detect_intent_stream(
+        transcript, response_text, output_file_path = detect_intent_audio(
             DialogflowConfig_ASR.project_id,
             DialogflowConfig_ASR.location,
             DialogflowConfig_ASR.agent_id,
