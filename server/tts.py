@@ -3,7 +3,7 @@ from flask_restx import Resource
 import uuid
 import os
 
-from config import DialogflowConfig_TTS
+from config import DialogflowConfig_TTS, DEFAULT_MEDIA_DIR
 from dialogflow_util import detect_intent_synthesize_tts_response
 
 
@@ -13,7 +13,7 @@ class TTS(Resource):
 
     def run_tts(self, text):
         session_id = str(uuid.uuid4())
-        output_file_path = f'{session_id}.mp4'
+        output_file_path = f'DEFAULT_MEDIA_DIR/{session_id}.mp4'
         detect_intent_synthesize_tts_response(
             DialogflowConfig_TTS.project_id,
             DialogflowConfig_TTS.location,
