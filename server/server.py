@@ -20,6 +20,7 @@ class FlaskServer:
         host='0.0.0.0',
         ip_ban_mode:bool=True,
         limit_mode:bool=True,
+        ascii_mode:bool=False,
     ):
         self.name = name
         self.title = title
@@ -31,6 +32,8 @@ class FlaskServer:
 
         # init Flask application
         self.app = Flask(name)
+        if not ascii_mode:
+            self.app.config['JSON_AS_ASCII'] = False
         self.api = Api(self.app, version=version, title=title, description=description)
 
         self.limit_mode = limit_mode
