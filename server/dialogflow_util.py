@@ -11,6 +11,9 @@ from pydub import AudioSegment
 from pydub.utils import make_chunks
 
 
+#--------------------------------------------------------------
+# TTS (Text to Speech) response
+
 def detect_intent_synthesize_tts_response(
     project_id,
     location,
@@ -69,41 +72,8 @@ def detect_intent_synthesize_tts_response(
     print(f'Audio content written to file: {output_file}')
 
 
-def detect_intent_audio(agent, session_id, audio_file_path, language_code):
-    """Returns the result of detect intent with an audio file as input.
-    Using the same `session_id` between requests allows continuation
-    of the conversation."""
-    session_path = f"{agent}/sessions/{session_id}"
-    print(f"Session path: {session_path}\n")
-    client_options = None
-    agent_components = AgentsClient.parse_agent_path(agent)
-    location_id = agent_components["location"]
-    if location_id != "global":
-        api_endpoint = f"{location_id}-dialogflow.googleapis.com:443"
-        print(f"API Endpoint: {api_endpoint}\n")
-        client_options = {"api_endpoint": api_endpoint}
-    session_client = SessionsClient(client_options=client_options)
-
-    input_audio_config = audio_config.InputAudioConfig(
-        audio_encoding=audio_config.AudioEncoding.AUDIO_ENCODING_LINEAR_16,
-        sample_rate_hertz=24000,
-    )
-
-    with open(audio_file_path, "rb") as audio_file:
-        input_audio = audio_file.read()
-
-    audio_input = session.AudioInput(config=input_audio_config, audio=input_audio)
-    query_input = session.QueryInput(audio=audio_input, language_code=language_code)
-    request = session.DetectIntentRequest(session=session_path, query_input=query_input)
-    response = session_client.detect_intent(request=request)
-
-    print("=" * 20)
-    print(f"Query text: {response.query_result.transcript}")
-    response_messages = [
-        " ".join(msg.text.text) for msg in response.query_result.response_messages
-    ]
-    print(f"Response text: {' '.join(response_messages)}\n")
-
+#--------------------------------------------------------------
+# Chatbot
 
 def detect_intent_texts(project_id, location_id, agent_id, session_id, text, language_code, debug=False):
     """Returns the result of detect intent with texts as inputs.
@@ -112,8 +82,6 @@ def detect_intent_texts(project_id, location_id, agent_id, session_id, text, lan
     agent = f"projects/{project_id}/locations/{location_id}/agents/{agent_id}"
 
     session_path = f"{agent}/sessions/{session_id}"
-    if debug:
-        print(f"Session path: {session_path}\n")
     client_options = None
     agent_components = AgentsClient.parse_agent_path(agent)
     
@@ -144,16 +112,31 @@ def detect_intent_texts(project_id, location_id, agent_id, session_id, text, lan
     return response_text
 
 
-def detect_intent_stream(agent, session_id, audio_file_path, language_code):
+#--------------------------------------------------------------
+# Automatic Speech Recognition + TTS
+
+def detect_intent_stream(
+    project_id, 
+    location_id, 
+    agent_id, 
+    session_id, 
+    audio_file_path, 
+    language_code, 
+    audio_encoding, 
+    output_file, 
+    debug=True, 
+    voice_selection=False,
+    speaking_rate=1,
+    pitch=0.0,
+):
     """Returns the result of detect intent with streaming audio as input.
 
     Using the same `session_id` between requests allows continuation
     of the conversation."""
+    agent = f"projects/{project_id}/locations/{location_id}/agents/{agent_id}"
+
     session_path = f"{agent}/sessions/{session_id}"
-    print(f"Session path: {session_path}\n")
     client_options = None
-    agent_components = AgentsClient.parse_agent_path(agent)
-    location_id = agent_components["location"]
     if location_id != "global":
         api_endpoint = f"{location_id}-dialogflow.googleapis.com:443"
         print(f"API Endpoint: {api_endpoint}\n")
@@ -168,23 +151,28 @@ def detect_intent_stream(agent, session_id, audio_file_path, language_code):
     def request_generator():
         audio_input = session.AudioInput(config=input_audio_config)
         query_input = session.QueryInput(audio=audio_input, language_code=language_code)
-        voice_selection = audio_config.VoiceSelectionParams()
-        synthesize_speech_config = audio_config.SynthesizeSpeechConfig()
-        output_audio_config = audio_config.OutputAudioConfig()
 
-        # Sets the voice name and gender
-        voice_selection.name = "en-GB-Standard-A"
-        voice_selection.ssml_gender = (
-            audio_config.SsmlVoiceGender.SSML_VOICE_GENDER_FEMALE
-        )
-
-        synthesize_speech_config.voice = voice_selection
+        if voice_selection:
+            voice_selection = audio_config.VoiceSelectionParams()
+            synthesize_speech_config = audio_config.SynthesizeSpeechConfig()
+            # Sets the voice name and gender
+            voice_selection.name = "en-GB-Standard-A"
+            voice_selection.ssml_gender = (
+                audio_config.SsmlVoiceGender.SSML_VOICE_GENDER_FEMALE
+            )
+            synthesize_speech_config.voice = voice_selection
+        else:
+            synthesize_speech_config = audio_config.SynthesizeSpeechConfig(
+                speaking_rate=speaking_rate,
+                pitch=pitch,
+            )
 
         # Sets the audio encoding
-        output_audio_config.audio_encoding = (
-            audio_config.OutputAudioEncoding.OUTPUT_AUDIO_ENCODING_UNSPECIFIED
+        output_audio_config = audio_config.OutputAudioConfig(
+            synthesize_speech_config=synthesize_speech_config,
+            audio_encoding=audio_config.OutputAudioEncoding[audio_encoding],
         )
-        output_audio_config.synthesize_speech_config = synthesize_speech_config
+        # output_audio_config.synthesize_speech_config = synthesize_speech_config
 
         # The first request contains the configuration.
         yield session.StreamingDetectIntentRequest(
@@ -227,10 +215,25 @@ def detect_intent_stream(agent, session_id, audio_file_path, language_code):
     for response in responses:
         print(f'Intermediate transcript: "{response.recognition_result.transcript}".')
 
-    # Note: The result from the last response is the final transcript along with the detected content.
+    # Note: The result from the last response is the final transcript along
+    # with the detected content.
     response = response.detect_intent_response
-    print(f"Query text: {response.query_result.transcript}")
     response_messages = [
         " ".join(msg.text.text) for msg in response.query_result.response_messages
     ]
-    print(f"Response text: {' '.join(response_messages)}\n")
+    response_text = ' '.join(response_messages)
+
+    if debug:
+        print("=" * 20)
+        print(f"Query text: {response.query_result.transcript}")
+        print(f"Response text: {response_text}\n")
+        print(
+        'Speaking Rate: '
+        f'{response.output_audio_config.synthesize_speech_config.speaking_rate}')
+        print(
+        'Pitch: '
+        f'{response.output_audio_config.synthesize_speech_config.pitch}')
+    with open(output_file, 'wb') as fout:
+        fout.write(response.output_audio)
+    
+    return response.query_result.transcript, response_text, output_file
