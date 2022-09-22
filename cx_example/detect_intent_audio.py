@@ -33,19 +33,23 @@ from google.cloud.dialogflowcx_v3.types import session
 # [START dialogflow_detect_intent_audio]
 def run_sample():
     # TODO(developer): Replace these values when running the function
-    project_id = "YOUR-PROJECT-ID"
+    project_id = "r3test"
     # For more information about regionalization see https://cloud.google.com/dialogflow/cx/docs/how/region
-    location_id = "YOUR-LOCATION-ID"
+    location_id = "asia-northeast1"
     # For more info on agents see https://cloud.google.com/dialogflow/cx/docs/concept/agent
-    agent_id = "YOUR-AGENT-ID"
+    agent_id = "254d14dd-3328-4620-ada6-6b7a97bb10da"
     agent = f"projects/{project_id}/locations/{location_id}/agents/{agent_id}"
     # For more information on sessions see https://cloud.google.com/dialogflow/cx/docs/concept/session
     session_id = str(uuid.uuid4())
-    audio_file_path = "YOUR-AUDIO-FILE-PATH"
-    # For more supported languages see https://cloud.google.com/dialogflow/es/docs/reference/language
-    language_code = "en-us"
 
-    detect_intent_audio(agent, session_id, audio_file_path, language_code)
+    audio_files = [f'test{i}.mp3' for i in range(3,5)]
+    # For more supported languages see https://cloud.google.com/dialogflow/es/docs/reference/language
+    language_code = "ko"
+
+    # run detect_intent_audio for all test cases
+    for audio_file in audio_files:
+        print(audio_file)
+        detect_intent_audio(agent, session_id, audio_file, language_code)
 
 
 def detect_intent_audio(agent, session_id, audio_file_path, language_code):
@@ -87,28 +91,29 @@ def detect_intent_audio(agent, session_id, audio_file_path, language_code):
 # [END dialogflow_detect_intent_audio]
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(
-        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
-    )
-    parser.add_argument(
-        "--agent", help="Agent resource name.  Required.", required=True
-    )
-    parser.add_argument(
-        "--session-id",
-        help="Identifier of the DetectIntent session. " "Defaults to a random UUID.",
-        default=str(uuid.uuid4()),
-    )
-    parser.add_argument(
-        "--language-code",
-        help='Language code of the query. Defaults to "en-US".',
-        default="en-US",
-    )
-    parser.add_argument(
-        "--audio-file-path", help="Path to the audio file.", required=True
-    )
+    # parser = argparse.ArgumentParser(
+    #     description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    # )
+    # parser.add_argument(
+    #     "--agent", help="Agent resource name.  Required.", required=True
+    # )
+    # parser.add_argument(
+    #     "--session-id",
+    #     help="Identifier of the DetectIntent session. " "Defaults to a random UUID.",
+    #     default=str(uuid.uuid4()),
+    # )
+    # parser.add_argument(
+    #     "--language-code",
+    #     help='Language code of the query. Defaults to "en-US".',
+    #     default="en-US",
+    # )
+    # parser.add_argument(
+    #     "--audio-file-path", help="Path to the audio file.", required=True
+    # )
 
-    args = parser.parse_args()
+    # args = parser.parse_args()
 
-    detect_intent_audio(
-        args.agent, args.session_id, args.audio_file_path, args.language_code
-    )
+    # detect_intent_audio(
+    #     args.agent, args.session_id, args.audio_file_path, args.language_code
+    # )
+    run_sample()
