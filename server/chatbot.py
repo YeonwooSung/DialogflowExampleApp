@@ -1,9 +1,19 @@
+from flask import Response
+from functools import wraps
 from flask_restx import Resource
 import uuid
 import json
 
 from config import DialogflowConfig_TTS
 from dialogflow_util import detect_intent_texts
+
+
+def as_json(f):
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        data = f(*args, **kwargs)
+        return Response(json.dumps(data), mimetype='application/json; charset=utf-8')
+    return wrapper
 
 
 class Chatbot(Resource):
@@ -23,6 +33,6 @@ class Chatbot(Resource):
         )
         return self.genereate_json_with_utf8(response)
     
+    @as_json
     def genereate_json_with_utf8(self, input_data):
-        #return (json.dumps(input_data, ensure_ascii=False)).encode('utf8'), {'Content-Type': 'application/json; charset=utf-8'}
-        return {"결과": input_data}, {'Content-Type': 'application/json; charset=utf-8'}
+        return {"결과": input_data} #, {'Content-Type': 'application/json; charset=utf-8'}
