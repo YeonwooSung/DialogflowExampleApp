@@ -133,6 +133,5 @@ def detect_intent_texts(project_id, location_id, agent_id, session_id, text, lan
         " ".join(msg.text.text) for msg in response.query_result.response_messages
     ]
 
-    msg = f"Response text: {' '.join(response_messages)}\n"
-    print(msg)
-    return msg
+    print(f"Response text: {' '.join(response_messages)}\n")
+    return response_messages
