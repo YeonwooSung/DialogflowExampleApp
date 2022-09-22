@@ -11,7 +11,7 @@ from wrapper import as_json
 class AutomaticSpeechRecognition(Resource):
     def run_asr(self, input_file_path, text_only=False, debug=False):
         session_id = str(uuid.uuid4())
-        output_file_path = f'DEFAULT_MEDIA_DIR/{session_id}.mp3'
+        output_file_path = f'{DEFAULT_MEDIA_DIR}/{session_id}.mp3'
 
         # send API request for automatic speech recognition with text to speech
         transcript, response_text, output_file_path = detect_intent_audio(
