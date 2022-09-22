@@ -85,6 +85,11 @@ class FlaskServer:
                 filename = secure_filename(audio_file.filename)
                 input_file_path = os.path.join(INPUT_MEDIA_DIR, filename)
                 audio_file.save(input_file_path)
+
+                print('input_file_path:', input_file_path)
+
+                if not os.path.exists(input_file_path):
+                    return 'File is missing', 404
                 return self.run_asr(input_file_path)
 
 
