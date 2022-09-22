@@ -9,7 +9,7 @@ from dialogflow_util import detect_intent_synthesize_tts_response
 
 class TTS(Resource):
     def get(self):
-        return self.run_tts('오늘 날씨 알려줘')
+        return self.run_tts('오늘 날씨 알려줘!')
 
     def run_tts(self, text):
         session_id = str(uuid.uuid4())

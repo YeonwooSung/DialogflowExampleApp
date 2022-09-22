@@ -1,6 +1,6 @@
 from flask_restx import Resource
 import uuid
-import os
+import json
 
 from config import DialogflowConfig_TTS
 from dialogflow_util import detect_intent_texts
@@ -8,7 +8,7 @@ from dialogflow_util import detect_intent_texts
 
 class Chatbot(Resource):
     def get(self):
-        text = 'hello'
+        text = '안녕하세요!'
         return self.run_chatbot(text)
 
     def run_chatbot(self, text):
@@ -21,4 +21,7 @@ class Chatbot(Resource):
             text,
             DialogflowConfig_TTS.language_code,
         )
-        return {'response': response}
+        return self.genereate_json_with_utf8(response)
+    
+    def genereate_json_with_utf8(self, obj):
+        return json.dumps(obj, ensure_ascii=False).encode('utf8')
