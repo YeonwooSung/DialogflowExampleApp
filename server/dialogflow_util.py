@@ -121,6 +121,8 @@ def detect_intent_texts(project_id, location_id, agent_id, session_id, text, lan
     session_client = SessionsClient(client_options=client_options)
 
     text_input = session.TextInput(text=text)
+    print(f'text: {text}')
+    print(f"Text Input: {text_input}")
     query_input = session.QueryInput(text=text_input, language_code=language_code)
     request = session.DetectIntentRequest(
         session=session_path, query_input=query_input
