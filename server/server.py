@@ -5,6 +5,7 @@ from flask_limiter.util import get_remote_address
 from flask_ipban import IpBan
 
 
+from asr import AutomaticSpeechRecognition
 from chatbot import Chatbot
 from tts import TTS
 from test import Test
@@ -34,7 +35,13 @@ class FlaskServer:
         self.app = Flask(name)
         if not ascii_mode:
             self.app.config['JSON_AS_ASCII'] = False
-        self.api = Api(self.app, version=version, title=title, description=description)
+        self.api = Api(
+            self.app, 
+            version=version, 
+            title=title, 
+            description=description,
+            terms_url='/'
+        )
 
         self.limit_mode = limit_mode
         self.limiter = None
@@ -64,6 +71,13 @@ class FlaskServer:
 
         # Define routes
         API = self.api
+
+        @API.route('/asr')
+        class ASR(AutomaticSpeechRecognition):
+            def post(self):
+                input_file_path = request.files['file']
+                return self.run_asr(input_file_path)
+
 
         @API.route('/chatbot')
         class ChatbotAPI(Chatbot):

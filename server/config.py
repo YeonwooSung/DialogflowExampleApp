@@ -8,4 +8,4 @@ class DialogflowConfig:
     language_code='ko'
 
 class DialogflowConfig_TTS(DialogflowConfig):
-    audio_encoding=audio_config.AudioEncoding.AUDIO_ENCODING_LINEAR_16
+    audio_encoding="OUTPUT_AUDIO_ENCODING_MP3_64_KBPS"

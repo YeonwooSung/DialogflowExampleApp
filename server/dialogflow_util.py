@@ -172,7 +172,6 @@ def detect_intent_stream(
             synthesize_speech_config=synthesize_speech_config,
             audio_encoding=audio_config.OutputAudioEncoding[audio_encoding],
         )
-        # output_audio_config.synthesize_speech_config = synthesize_speech_config
 
         # The first request contains the configuration.
         yield session.StreamingDetectIntentRequest(

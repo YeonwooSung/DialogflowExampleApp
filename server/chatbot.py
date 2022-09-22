@@ -1,19 +1,10 @@
-from flask import Response
-from functools import wraps
 from flask_restx import Resource
 import uuid
-import json
 
 from config import DialogflowConfig_TTS
 from dialogflow_util import detect_intent_texts
+from wrapper import as_json
 
-
-def as_json(f):
-    @wraps(f)
-    def wrapper(*args, **kwargs):
-        data = f(*args, **kwargs)
-        return Response(json.dumps(data), mimetype='application/json; charset=utf-8')
-    return wrapper
 
 
 class Chatbot(Resource):
