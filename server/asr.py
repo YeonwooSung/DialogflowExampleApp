@@ -44,7 +44,7 @@ class AutomaticSpeechRecognition(Resource):
         # genearate multipart/form-data response with audio file
         m = MultipartEncoder(
             fields={
-                'json': (None, self.genereate_json_with_utf8(input_data), 'application/json'),
+                'json': (None, input_data, 'application/json'),
                 'audio': (output_file_path, open(output_file_path, 'rb'), 'audio/mpeg'),
             }
         )
