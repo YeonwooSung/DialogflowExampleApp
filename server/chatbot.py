@@ -18,10 +18,13 @@ class Chatbot(Resource):
             DialogflowConfig_TTS.location,
             DialogflowConfig_TTS.agent_id,
             session_id,
-            text,
+            self.text_to_utf8(text),
             DialogflowConfig_TTS.language_code,
         )
         return self.genereate_json_with_utf8(response)
     
     def genereate_json_with_utf8(self, obj):
         return json.dumps(obj, ensure_ascii=False).encode('utf8')
+    
+    def text_to_utf8(self, text):
+        return text.encode('utf8')
