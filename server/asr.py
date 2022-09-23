@@ -5,8 +5,8 @@ import os
 
 from requests_toolbelt import MultipartEncoder
 
-from config import DialogflowConfig_ASR, DEFAULT_MEDIA_DIR
-from dialogflow_util import detect_intent_stream, detect_intent_audio
+from config import DialogflowConfig_ASR, DialogflowConfig_TTS, DEFAULT_MEDIA_DIR
+from dialogflow_util import detect_intent_stream, detect_intent_audio, detect_intent_synthesize_tts_response
 from wrapper import as_json
 
 
@@ -14,19 +14,34 @@ class AutomaticSpeechRecognition(Resource):
     def run_asr(self, input_file_path, text_only=False, debug=False):
         session_id = str(uuid.uuid4())
         output_file_path = f'{DEFAULT_MEDIA_DIR}/{session_id}.mp3'
-
-        # send API request for automatic speech recognition with text to speech
-        transcript, response_text, output_file_path = detect_intent_audio(
-            DialogflowConfig_ASR.project_id,
-            DialogflowConfig_ASR.location,
-            DialogflowConfig_ASR.agent_id,
-            session_id,
-            input_file_path,
-            DialogflowConfig_ASR.language_code,
-            DialogflowConfig_ASR.audio_encoding,
-            output_file_path,
-            debug=debug,
-        )
+        try:
+            # send API request for automatic speech recognition with text to speech
+            transcript, response_text, output_file_path = detect_intent_audio(
+                DialogflowConfig_ASR.project_id,
+                DialogflowConfig_ASR.location,
+                DialogflowConfig_ASR.agent_id,
+                session_id,
+                input_file_path,
+                DialogflowConfig_ASR.language_code,
+                DialogflowConfig_ASR.audio_encoding,
+                output_file_path,
+                debug=debug,
+            )
+        except:
+            print('[ERROR] Failed to run ASR')
+            print(' - rerun with TTS')
+            detect_intent_synthesize_tts_response(
+                DialogflowConfig_TTS.project_id,
+                DialogflowConfig_TTS.location,
+                DialogflowConfig_TTS.agent_id,
+                "음성 인식에 실패했습니다.",
+                DialogflowConfig_TTS.audio_encoding,
+                DialogflowConfig_TTS.language_code,
+                output_file_path,
+                session_id,
+            )
+            transcript = "음성 인식에 실패했습니다."
+            response_text = "음성 인식에 실패했습니다."
 
         # generate text_only output
         text_only_output_json = {'입력': transcript, '결과': response_text}
