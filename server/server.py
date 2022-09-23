@@ -85,6 +85,7 @@ class FlaskServer:
                 filename = secure_filename(audio_file.filename)
                 input_file_path = os.path.join(INPUT_MEDIA_DIR, filename)
                 audio_file.save(input_file_path)
+                audio_file.close()
 
                 print('input_file_path:', input_file_path)
 

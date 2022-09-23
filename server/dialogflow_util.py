@@ -145,9 +145,16 @@ def detect_intent_audio(
         sample_rate_hertz=24000,
     )
 
-    # with open(audio_file_path, "rb") as audio_file:
-    #     input_audio = audio_file.read()
-    input_audio = AudioSegment.from_mp3(audio_file_path).raw_data
+    input_audio = None
+    with open(audio_file_path, "rb") as audio_file:
+        data = audio_file.read(1024)
+        while data:
+            if input_audio:
+                input_audio += data
+            else:
+                input_audio = data
+            data = audio_file.read(1024)
+    # input_audio = AudioSegment.from_mp3(audio_file_path).raw_data
 
     audio_input = session.AudioInput(config=input_audio_config, audio=input_audio)
     synthesize_speech_config = audio_config.SynthesizeSpeechConfig(
