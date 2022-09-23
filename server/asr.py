@@ -1,4 +1,4 @@
-from flask import Response
+from flask import Response, send_file
 from flask_restx import Resource
 import uuid
 import os
@@ -36,7 +36,8 @@ class AutomaticSpeechRecognition(Resource):
 
         # check if file exists
         if os.path.isfile(output_file_path):
-            return self.generate_json_response_with_audio(transcript, response_text, output_file_path)
+            return send_file(output_file_path, as_attachment=True)
+            # return self.generate_json_response_with_audio(transcript, response_text, output_file_path)
         else:
             return self.genereate_json_with_utf8(text_only_output_json)
 

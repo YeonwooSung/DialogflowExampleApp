@@ -29,6 +29,7 @@ from google.cloud.dialogflowcx_v3.services.sessions import SessionsClient
 from google.cloud.dialogflowcx_v3.types import audio_config
 from google.cloud.dialogflowcx_v3.types import session
 
+from pydub import AudioSegment
 
 # [START dialogflow_detect_intent_audio]
 def run_sample():
@@ -42,7 +43,7 @@ def run_sample():
     # For more information on sessions see https://cloud.google.com/dialogflow/cx/docs/concept/session
     session_id = str(uuid.uuid4())
 
-    audio_files = [f'test{i}.mp3' for i in range(3,5)]
+    audio_files = [f'test{i}.mp3' for i in range(1,5)]
     # For more supported languages see https://cloud.google.com/dialogflow/es/docs/reference/language
     language_code = "ko"
 
@@ -72,8 +73,9 @@ def detect_intent_audio(agent, session_id, audio_file_path, language_code):
         sample_rate_hertz=24000,
     )
 
-    with open(audio_file_path, "rb") as audio_file:
-        input_audio = audio_file.read()
+    # with open(audio_file_path, "rb") as audio_file:
+    #     input_audio = audio_file.read()
+    input_audio = AudioSegment.from_mp3(audio_file_path).raw_data
 
     audio_input = session.AudioInput(config=input_audio_config, audio=input_audio)
     query_input = session.QueryInput(audio=audio_input, language_code=language_code)
