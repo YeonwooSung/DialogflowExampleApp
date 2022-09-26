@@ -80,8 +80,15 @@ class FlaskServer:
                 if 'file' not in request.files:
                     return 'File is missing', 404
                 audio_file = request.files['file']
+                try:
+                    input_file_path = self.parse_uploaded_file(audio_file)
+                    return self.run_asr(input_file_path, from_android=True), 200
+                except Exception as e:
+                    return str(e), 400
+            
+            def parse_uploaded_file(self, audio_file):
                 if audio_file.filename == '':
-                    return 'File is missing', 404
+                    raise Exception('File is missing')
                 filename = secure_filename(audio_file.filename)
                 input_file_path = os.path.join(INPUT_MEDIA_DIR, filename)
                 audio_file.save(input_file_path)
@@ -90,27 +97,20 @@ class FlaskServer:
                 print('input_file_path:', input_file_path)
 
                 if not os.path.exists(input_file_path):
-                    return 'File is missing', 404
-                return self.run_asr(input_file_path, from_android=True)
+                    raise Exception('File not found')
+                return input_file_path
 
-        @API.route('/stt')
-        class STT(AutomaticSpeechRecognition):
+        @API.route('/asr/web')
+        class STT(ASR):
             def post(self):
                 if 'file' not in request.files:
                     return 'File is missing', 404
                 audio_file = request.files['file']
-                if audio_file.filename == '':
-                    return 'File is missing', 404
-                filename = secure_filename(audio_file.filename)
-                input_file_path = os.path.join(INPUT_MEDIA_DIR, filename)
-                audio_file.save(input_file_path)
-                audio_file.close()
-
-                print('input_file_path:', input_file_path)
-
-                if not os.path.exists(input_file_path):
-                    return 'File is missing', 404
-                return self.run_asr(input_file_path, from_android=False)
+                try:
+                    input_file_path = self.parse_uploaded_file(audio_file)
+                    return self.run_asr(input_file_path, from_android=True), 200
+                except Exception as e:
+                    return str(e), 400
 
 
         @API.route('/chatbot')
