@@ -122,6 +122,7 @@ def detect_intent_audio(
     audio_encoding, 
     output_file, 
     debug=True, 
+    from_android=False,
     voice_selection=False,
     speaking_rate=1,
     pitch=0.0,
@@ -154,7 +155,10 @@ def detect_intent_audio(
     #         else:
     #             input_audio = data
     #         data = audio_file.read(1024)
-    input_audio = AudioSegment.from_mp3(audio_file_path).raw_data
+    if from_android:
+        input_audio = AudioSegment.from_file(audio_file_path, format="mp4").raw_data
+    else:
+        input_audio = AudioSegment.from_mp3(audio_file_path).raw_data
 
     audio_input = session.AudioInput(config=input_audio_config, audio=input_audio)
     synthesize_speech_config = audio_config.SynthesizeSpeechConfig(

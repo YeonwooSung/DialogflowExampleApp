@@ -11,7 +11,7 @@ from wrapper import as_json
 
 
 class AutomaticSpeechRecognition(Resource):
-    def run_asr(self, input_file_path, text_only=False, debug=False):
+    def run_asr(self, input_file_path, text_only=False, debug=False, from_android=False):
         session_id = str(uuid.uuid4())
         output_file_path = f'{DEFAULT_MEDIA_DIR}/{session_id}.mp3'
         try:
@@ -26,6 +26,7 @@ class AutomaticSpeechRecognition(Resource):
                 DialogflowConfig_ASR.audio_encoding,
                 output_file_path,
                 debug=debug,
+                from_android=from_android,
             )
         except:
             print('[ERROR] Failed to run ASR')
