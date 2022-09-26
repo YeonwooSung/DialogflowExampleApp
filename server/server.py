@@ -73,70 +73,71 @@ class FlaskServer:
 
         # Define routes
         API = self.api
-        API.add_namespace(ASR, path='/asr')
-        API.add_namespace(STT, path='/stt')
-        API.add_namespace(TTS_API, path='/tts')
-        API.add_namespace(Test, path='/test')
-        API.add_namespace(Chatbot, path='/chatbot')
+
+        @API.route('/asr')
+        class ASR(AutomaticSpeechRecognition):
+            def post(self):
+                if 'file' not in request.files:
+                    return 'File is missing', 404
+                audio_file = request.files['file']
+                try:
+                    input_file_path = self.parse_uploaded_file(audio_file)
+                    return self.run_asr(input_file_path, from_android=True), 200
+                except Exception as e:
+                    return str(e), 400
+            
+            def parse_uploaded_file(self, audio_file):
+                if audio_file.filename == '':
+                    raise Exception('File is missing')
+                filename = secure_filename(audio_file.filename)
+                input_file_path = os.path.join(INPUT_MEDIA_DIR, filename)
+                audio_file.save(input_file_path)
+                audio_file.close()
+
+                print('input_file_path:', input_file_path)
+
+                if not os.path.exists(input_file_path):
+                    raise Exception('File not found')
+                return input_file_path
+
+        @API.route('/asr/web')
+        class STT(ASR):
+            def post(self):
+                if 'file' not in request.files:
+                    return 'File is missing', 404
+                audio_file = request.files['file']
+                try:
+                    input_file_path = self.parse_uploaded_file(audio_file)
+                    return self.run_asr(input_file_path, from_android=True), 200
+                except Exception as e:
+                    return str(e), 400
 
 
-class ASR(AutomaticSpeechRecognition):
-    def post(self):
-        if 'file' not in request.files:
-            return 'File is missing', 404
-        audio_file = request.files['file']
-        try:
-            input_file_path = self.parse_uploaded_file(audio_file)
-            return self.run_asr(input_file_path, from_android=True), 200
-        except Exception as e:
-            return str(e), 400
-    
-    def parse_uploaded_file(self, audio_file):
-        if audio_file.filename == '':
-            raise Exception('File is missing')
-        filename = secure_filename(audio_file.filename)
-        input_file_path = os.path.join(INPUT_MEDIA_DIR, filename)
-        audio_file.save(input_file_path)
-        audio_file.close()
+        @API.route('/chatbot')
+        class ChatbotAPI(Chatbot):
+            def post(self):
+                parameter_dict = request.args.to_dict()
+                if len(parameter_dict) == 0:
+                    # set status code as 400
+                    return {'error': 'no parameter'}, 400
+                if 'text' not in parameter_dict:
+                    # set status code as 400
+                    return {'error': 'no text parameter'}, 400
+                text = parameter_dict['text']
+                return self.run_chatbot(text)
 
-        print('input_file_path:', input_file_path)
+        @API.route('/tts')
+        class TTS_API(TTS):
+            def post(self):
+                parameter_dict = request.args.to_dict()
+                if len(parameter_dict) == 0:
+                    # set status code as 400
+                    return {'error': 'no parameter'}, 400
+                if 'text' not in parameter_dict:
+                    # set status code as 400
+                    return {'error': 'no text parameter'}, 400
+                text = parameter_dict['text']
+                return self.run_tts(text)
 
-        if not os.path.exists(input_file_path):
-            raise Exception('File not found')
-        return input_file_path
-
-class STT(ASR):
-    def post(self):
-        if 'file' not in request.files:
-            return 'File is missing', 404
-        audio_file = request.files['file']
-        try:
-            input_file_path = self.parse_uploaded_file(audio_file)
-            return self.run_asr(input_file_path, from_android=True), 200
-        except Exception as e:
-            return str(e), 400
-
-
-class ChatbotAPI(Chatbot):
-    def post(self):
-        parameter_dict = request.args.to_dict()
-        if len(parameter_dict) == 0:
-            # set status code as 400
-            return {'error': 'no parameter'}, 400
-        if 'text' not in parameter_dict:
-            # set status code as 400
-            return {'error': 'no text parameter'}, 400
-        text = parameter_dict['text']
-        return self.run_chatbot(text)
-
-class TTS_API(TTS):
-    def post(self):
-        parameter_dict = request.args.to_dict()
-        if len(parameter_dict) == 0:
-            # set status code as 400
-            return {'error': 'no parameter'}, 400
-        if 'text' not in parameter_dict:
-            # set status code as 400
-            return {'error': 'no text parameter'}, 400
-        text = parameter_dict['text']
-        return self.run_tts(text)
+        @API.route('/test')
+        class TestAPI(Test):pass
