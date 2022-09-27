@@ -82,7 +82,7 @@ class FlaskServer:
                 audio_file = request.files['file']
                 try:
                     input_file_path = self.parse_uploaded_file(audio_file)
-                    return self.run_asr(input_file_path, from_android=True), 200
+                    return self.run_asr(input_file_path, from_android=True)
                 except Exception as e:
                     return str(e), 400
             
@@ -108,7 +108,7 @@ class FlaskServer:
                 audio_file = request.files['file']
                 try:
                     input_file_path = self.parse_uploaded_file(audio_file)
-                    return self.run_asr(input_file_path, from_android=True), 200
+                    return self.run_asr(input_file_path, from_android=True)
                 except Exception as e:
                     return str(e), 400
 
