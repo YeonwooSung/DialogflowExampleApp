@@ -9,6 +9,23 @@ from pydub.utils import make_chunks
 
 
 #--------------------------------------------------------------
+# Constants
+
+DEBUG_LINE_BOUNDARY_NUM = 20
+
+DEFAULT_START = 0
+DEFAULT_VOLUME = 100
+SAMPLE_RATE_HERTZ = 24000
+
+CURRENT_VOLUME = DEFAULT_VOLUME
+MIN_TO_SEC = 60
+CHUNK_SIZE = 1000.0
+AUDIO_CHUNK_OFFSET = (MIN_TO_SEC - (MIN_TO_SEC * (CURRENT_VOLUME/DEFAULT_VOLUME)))
+
+MILISEC_CHUNK = 50 / 1000.0
+CHUNK_READ_SIZE = MILISEC_CHUNK * 1000
+
+#--------------------------------------------------------------
 # TTS (Text to Speech) response
 
 def detect_intent_synthesize_tts_response(
@@ -143,7 +160,7 @@ def detect_intent_audio(
 
     input_audio_config = audio_config.InputAudioConfig(
         audio_encoding=audio_config.AudioEncoding.AUDIO_ENCODING_LINEAR_16,
-        sample_rate_hertz=24000,
+        sample_rate_hertz=SAMPLE_RATE_HERTZ,
     )
 
     input_audio = None
@@ -229,7 +246,7 @@ def detect_intent_stream(
 
     input_audio_config = audio_config.InputAudioConfig(
         audio_encoding=audio_config.AudioEncoding.AUDIO_ENCODING_LINEAR_16,
-        sample_rate_hertz=24000,
+        sample_rate_hertz=SAMPLE_RATE_HERTZ,
     )
 
     def request_generator():
@@ -273,17 +290,15 @@ def detect_intent_stream(
                         rate=sound.frame_rate,
                         output=True) # frames_per_buffer=CHUNK_SIZE
         
-        start = 0
+        start = DEFAULT_START
         length = sound.duration_seconds
         end = start + length
-        volume = 100
         runtime = start
         keep_loop = True
-        playchunk = sound[start*1000.0:(start+length)*1000.0] - (60 - (60 * (volume/100.0)))
-        millisecondchunk = 50 / 1000.0
+        playchunk = sound[start*CHUNK_SIZE:(start+length)*CHUNK_SIZE] - AUDIO_CHUNK_OFFSET
         while keep_loop:
-            for chunks in make_chunks(playchunk, millisecondchunk * 1000):
-                runtime += millisecondchunk
+            for chunks in make_chunks(playchunk, CHUNK_READ_SIZE):
+                runtime += MILISEC_CHUNK
                 # output.write(chunks._data)
                 audio_input = session.AudioInput(audio=chunks._data)
                 query_input = session.QueryInput(audio=audio_input)
@@ -294,7 +309,7 @@ def detect_intent_stream(
 
     responses = session_client.streaming_detect_intent(requests=request_generator())
 
-    print("=" * 20)
+    print("=" * DEBUG_LINE_BOUNDARY_NUM)
     for response in responses:
         print(f'Intermediate transcript: "{response.recognition_result.transcript}".')
 
@@ -307,7 +322,7 @@ def detect_intent_stream(
     response_text = ' '.join(response_messages)
 
     if debug:
-        print("=" * 20)
+        print("=" * DEBUG_LINE_BOUNDARY_NUM)
         print(f"Query text: {response.query_result.transcript}")
         print(f"Response text: {response_text}\n")
         print(
