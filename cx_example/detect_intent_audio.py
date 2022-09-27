@@ -43,7 +43,8 @@ def run_sample():
     # For more information on sessions see https://cloud.google.com/dialogflow/cx/docs/concept/session
     session_id = str(uuid.uuid4())
 
-    audio_files = [f'test{i}.mp3' for i in range(1,5)]
+    audio_files = ['./test.mp3']
+    #audio_files = [f'test{i}.mp3' for i in range(1,5)]
     # For more supported languages see https://cloud.google.com/dialogflow/es/docs/reference/language
     language_code = "ko"
 
@@ -68,14 +69,18 @@ def detect_intent_audio(agent, session_id, audio_file_path, language_code):
         client_options = {"api_endpoint": api_endpoint}
     session_client = SessionsClient(client_options=client_options)
 
+    sound = AudioSegment.from_file(audio_file_path, format="mp4")
+    input_audio, sample_rate = sound.raw_data, sound.frame_rate
+
     input_audio_config = audio_config.InputAudioConfig(
         audio_encoding=audio_config.AudioEncoding.AUDIO_ENCODING_LINEAR_16,
-        sample_rate_hertz=24000,
+        sample_rate_hertz=sound.frame_rate,
     )
 
     # with open(audio_file_path, "rb") as audio_file:
     #     input_audio = audio_file.read()
-    input_audio = AudioSegment.from_mp3(audio_file_path).raw_data
+    #input_audio = AudioSegment.from_mp3(audio_file_path).raw_data
+    #play_audio(sound)
 
     audio_input = session.AudioInput(config=input_audio_config, audio=input_audio)
     query_input = session.QueryInput(audio=audio_input, language_code=language_code)
@@ -89,6 +94,34 @@ def detect_intent_audio(agent, session_id, audio_file_path, language_code):
     ]
     print(f"Response text: {' '.join(response_messages)}\n")
 
+
+def play_audio(sound):
+    import pyaudio
+    from pydub.utils import make_chunks
+    
+    p = pyaudio.PyAudio()
+    output = p.open(format=p.get_format_from_width(sound.sample_width),
+                    channels=sound.channels,
+                    rate=sound.frame_rate,
+                    output=True) # frames_per_buffer=CHUNK_SIZE
+    
+    start = 0
+    length = sound.duration_seconds
+    end = start + length
+    volume = 100
+    playchunk = sound[start*1000.0:(start+length)*1000.0] - (60 - (60 * (volume/100.0)))
+    millisecondchunk = 50 / 1000.0
+
+    runtime = start
+    keep_loop = True
+
+    while keep_loop:
+        for chunks in make_chunks(playchunk, millisecondchunk * 1000):
+            runtime += millisecondchunk
+            output.write(chunks._data)
+            if runtime >= end:
+                keep_loop = False
+                break
 
 # [END dialogflow_detect_intent_audio]
 

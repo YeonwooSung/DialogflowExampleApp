@@ -158,11 +158,6 @@ def detect_intent_audio(
         client_options = {"api_endpoint": api_endpoint}
     session_client = SessionsClient(client_options=client_options)
 
-    input_audio_config = audio_config.InputAudioConfig(
-        audio_encoding=audio_config.AudioEncoding.AUDIO_ENCODING_LINEAR_16,
-        sample_rate_hertz=SAMPLE_RATE_HERTZ,
-    )
-
     input_audio = None
     # with open(audio_file_path, "rb") as audio_file:
     #     data = audio_file.read(1024)
@@ -173,9 +168,16 @@ def detect_intent_audio(
     #             input_audio = data
     #         data = audio_file.read(1024)
     if from_android:
-        input_audio = AudioSegment.from_file(audio_file_path, format="mp4").raw_data
+        sound = AudioSegment.from_file(audio_file_path, format="mp4")
     else:
-        input_audio = AudioSegment.from_mp3(audio_file_path).raw_data
+        sound = AudioSegment.from_mp3(audio_file_path).raw_data
+    input_audio = sound.raw_data
+    sample_rate = sound.frame_rate
+
+    input_audio_config = audio_config.InputAudioConfig(
+        audio_encoding=audio_config.AudioEncoding.AUDIO_ENCODING_LINEAR_16,
+        sample_rate_hertz=sample_rate,
+    )
 
     audio_input = session.AudioInput(config=input_audio_config, audio=input_audio)
     synthesize_speech_config = audio_config.SynthesizeSpeechConfig(
