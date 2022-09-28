@@ -92,7 +92,8 @@ def detect_intent_audio(agent, session_id, audio_file_path, language_code):
     response_messages = [
         " ".join(msg.text.text) for msg in response.query_result.response_messages
     ]
-    print(f"Response text: {' '.join(response_messages)}\n")
+    response_text = ' '.join(response_messages)
+    print(f"Response text: {response_text}\n")
 
 
 def play_audio(sound):

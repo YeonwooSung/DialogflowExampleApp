@@ -52,10 +52,13 @@ class AutomaticSpeechRecognition(Resource):
 
         # check if file exists
         if os.path.isfile(output_file_path):
+            res = send_file(output_file_path, as_attachment=True)
+            res = self.process_cookie(res, transcript, response_text)
             return send_file(output_file_path, as_attachment=True)
             # return self.generate_json_response_with_audio(transcript, response_text, output_file_path)
         else:
             return self.genereate_json_with_utf8(text_only_output_json)
+
 
     def generate_json_response_with_audio(self, input_text, response_text, output_file_path):
         # genearate multipart/form-data response with audio file
@@ -67,6 +70,13 @@ class AutomaticSpeechRecognition(Resource):
             }
         )
         return Response(m.fields, mimetype=m.content_type)
+
+    def process_cookie(self, response, transcript, response_text):
+        # response.set_cookie('transcript', transcript)
+        # response.set_cookie('response_text', response_text)
+        if '네, 사진을 찍어드릴게요' in response_text:
+            response.set_cookie('action', 'photo')
+        return response
 
     @as_json
     def genereate_json_with_utf8(self, input_json):

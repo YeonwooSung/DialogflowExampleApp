@@ -170,7 +170,7 @@ def detect_intent_audio(
     if from_android:
         sound = AudioSegment.from_file(audio_file_path, format="mp4")
     else:
-        sound = AudioSegment.from_mp3(audio_file_path).raw_data
+        sound = AudioSegment.from_mp3(audio_file_path)
     input_audio = sound.raw_data
     sample_rate = sound.frame_rate
 
