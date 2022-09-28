@@ -54,7 +54,7 @@ class AutomaticSpeechRecognition(Resource):
         if os.path.isfile(output_file_path):
             res = send_file(output_file_path, as_attachment=True)
             res = self.process_cookie(res, transcript, response_text)
-            return send_file(output_file_path, as_attachment=True)
+            return res
             # return self.generate_json_response_with_audio(transcript, response_text, output_file_path)
         else:
             return self.genereate_json_with_utf8(text_only_output_json)
