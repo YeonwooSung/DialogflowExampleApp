@@ -10,7 +10,7 @@ source venv/bin/activate
 pip install -r requirements.txt
 
 # export global variable
-export GOOGLE_APPLICATION_CREDENTIALS="/Users/YeonwooSung/Documents/technonia/r3test-224927eaf4f2.json"
+export GOOGLE_APPLICATION_CREDENTIALS="PATH_TO_CREDENTIAL_JSON_FILE"
 ```
 
 ## Update requirements
